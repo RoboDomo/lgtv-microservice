@@ -1,5 +1,5 @@
 # lgtv-microservice
-MQTT  microservice for Denon AVR
+MQTT  microservice for LG TVs
 
 This microservice communicates with LG TVs and bridges control and status via MQTT.
 
@@ -19,7 +19,7 @@ To run it:
 ```
 $ docker run \
     -d \
-    -e "DENON_HOSTS=host[,host,host...]" \
+    -e "LGTV_HOSTS=host[,host,host...]" \
     --rm \
     --name="lgtv-microservice"
     lgtv-microservice

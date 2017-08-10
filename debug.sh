@@ -4,4 +4,4 @@
 docker run \
     --rm \
     --name="lgtv-microservice" \
-    autodomo/lgtv-microservice
+    robodomo/lgtv-microservice

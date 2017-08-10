@@ -1,4 +1,4 @@
-process.env.DEBUG='LGTVHost,HostBase'
+process.env.DEBUG='LGTVHost'
 
 const debug    = require('debug')('LGTVHost'),
       HostBase = require('microservice-core/HostBase'),
@@ -245,6 +245,9 @@ class LGTVHost extends HostBase {
         }
         else if (command === 'POWEROFF') {
             return this.power(false)
+        }
+        else if (command.startsWith('KEY_')) {
+            return this.sendKey(command.substr(4))
         }
         else if (command.startsWith('LAUNCH-')) {
             return this.request('system.launcher/launch', {id: command.substr(7)})

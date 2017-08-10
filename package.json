@@ -1,7 +1,7 @@
 {
   "name": "lgtv-microservice",
   "version": "1.0.0",
-  "description": "autodomo MQTT microservice to control and get status of LG TVs",
+  "description": "robodomo MQTT microservice to control and get status of LG TVs",
   "main": "index.js",
   "scripts": {
     "start": "forever ./index.js",
@@ -9,11 +9,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/autodomo/lgtv-microservice.git"
+    "url": "git+https://github.com/robodomo/lgtv-microservice.git"
   },
   "keywords": [
     "LG TV",
-    "autodomo",
+    "robodomo",
     "Home",
     "Automation",
     "MQTT"
@@ -21,13 +21,13 @@
   "author": "Michael Schwartz",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/autodomo/lgtv-microservice/issues"
+    "url": "https://github.com/robodomo/lgtv-microservice/issues"
   },
-  "homepage": "https://github.com/autodomo/lgtv-microservice#readme",
+  "homepage": "https://github.com/robodomo/lgtv-microservice#readme",
   "dependencies": {
     "debug": "^2.6.8",
     "lgtv2": "^1.4.1",
-    "microservice-core": "github:autodomo/microservice-core",
+    "microservice-core": "github:robodomo/microservice-core",
     "mqtt": "^2.11.0",
     "wake_on_lan": "0.0.4"
   }

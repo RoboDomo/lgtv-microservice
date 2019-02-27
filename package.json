@@ -26,7 +26,7 @@
   "homepage": "https://github.com/robodomo/lgtv-microservice#readme",
   "dependencies": {
     "debug": "^2.6.9",
-    "lgtv2": "^1.4.1",
+    "lgtv2": "github:robodomo/lgtv2",
     "microservice-core": "github:robodomo/microservice-core",
     "wake_on_lan": "0.0.4"
   }

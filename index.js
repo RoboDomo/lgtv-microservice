@@ -37,6 +37,7 @@ class LGTVHost extends HostBase {
       this.connected = this.connected.bind(this);
       this.connect();
     } catch (e) {
+      console.log("Exception", e.message, e.stack);
       debug(this.host, "Exception", e.message);
     }
   }
@@ -115,6 +116,7 @@ class LGTVHost extends HostBase {
   }
 
   async connected() {
+    console.log("connected");
     debug(this.host, "connected");
     const lgtv = this.lgtv;
 
@@ -124,11 +126,13 @@ class LGTVHost extends HostBase {
       // get mouse socket, which is used to send keystrokes
       this.mouseSocket = await this.getMouseSoocket();
       // get launch points (apps)
+      this.wait(10000);
       this.state = {
         launchPoints: this.processLaunchPoints(
           await this.request("com.webos.applicationManager/listLaunchPoints")
         )
       };
+      console.log("got launch points");
       Object.keys(SUBSCRIPTIONS).forEach(key => {
         this.subscribe(SUBSCRIPTIONS[key], key);
       });

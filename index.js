@@ -56,7 +56,7 @@ class LGTVHost extends HostBase {
     lgtv.on("error", e => {
       debug("error", e);
       this.mouseSocket = null;
-      this.connect();
+      //      this.connect();
     });
 
     lgtv.on("disconnect", err => {

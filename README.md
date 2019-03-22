@@ -27,6 +27,11 @@ $ docker run \
 
 (There is a run.sh script that will do the run command for you)
 
+*NOTE* lgtv-microservice expects LGTV_HOSTS env variable set to "hostname;mac[,hostname;mac...]"
+
+mac address is required for WOL to power on tv.
+
+
 To restart it:
 ```
 $ docker restart lgtv-micorservice

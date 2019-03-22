@@ -1,8 +1,9 @@
 process.env.DEBUG = "LGTVHost";
 
 const debug = require("debug")("LGTVHost"),
+  console = require("console"),
   HostBase = require("microservice-core/HostBase"),
-  wol = require("wake_on_lan");
+  wol = require("node-wol");
 
 const TOPIC_ROOT = process.env.TOPIC_ROOT || "lgtv",
   MQTT_HOST = process.env.MQTT_HOST,
@@ -26,8 +27,9 @@ const SUBSCRIPTIONS = {
 };
 
 class LGTVHost extends HostBase {
-  constructor(host) {
+  constructor(host, mac) {
     super(MQTT_HOST, TOPIC_ROOT + "/" + host);
+    this.mac = mac;
     process.env.DEBUG += "," + this.host;
     try {
       this.host = host;
@@ -52,21 +54,22 @@ class LGTVHost extends HostBase {
       keyFile: `./lgtv-${this.host}-keyFile`
     }));
 
+    console.log("lgtv", lgtv);
     // TODO: verify this is the right sequence
     lgtv.on("error", e => {
-      debug("error", e);
+      console.log("error", e);
       this.mouseSocket = null;
       //      this.connect();
     });
 
     lgtv.on("disconnect", err => {
-      debug("disconnect");
+      console.log("disconnect");
       if (err) {
         this.state = { power: "off" };
         console.log("lgtv connect error", e);
         return;
       }
-      debug(this.host, "disconnected");
+      console.log(this.host, "disconnected");
       this.isConnected = false;
       this.mouseSocket = null;
       this.lgtv = null;
@@ -90,7 +93,7 @@ class LGTVHost extends HostBase {
         (err, sock) => {
           debug("got mouse socket");
           if (err) {
-            debug(this.host, "Exception", err);
+            console.log(this.host, "Exception", err);
             reject(err);
             return;
           }
@@ -140,7 +143,7 @@ class LGTVHost extends HostBase {
         "ssap://com.webos.applicationManager/listLaunchPoints",
         (err, info) => {
           if (err) {
-            debug(this.host, "exception", err);
+            console.log(this.host, "exception", err);
             return;
           }
           this.state = {
@@ -150,7 +153,7 @@ class LGTVHost extends HostBase {
       );
       this.state = { power: "on" };
     } catch (e) {
-      debug("exception", e);
+      console.log("exception", e);
     }
 
     this.emit("connect");
@@ -158,17 +161,18 @@ class LGTVHost extends HostBase {
 
   subscribe(topic, member) {
     this.lgtv.subscribe(topic, (err, info) => {
-      debug(this.host, "subscribed", member);
+      console.log(this.host, "subscribed", member);
       if (err) {
-        debug(this.host, "ERROR", err);
+        console.log(this.host, "ERROR", err);
       } else {
-        debug(this.host, member, info);
+        console.log(this.host, member, info);
         const state = {};
         state[member] = info;
         if (state.foregroundApp && state.foregroundApp.appId === "") {
+          console.log("powering off", state.foregroundApp);
           state.power = "off";
         } else if (this.state.power === "off" && this.isConnected) {
-          debug("power on");
+          console.log("power on");
           state.power = "on";
         }
         this.state = state;
@@ -177,6 +181,7 @@ class LGTVHost extends HostBase {
   }
 
   power(state) {
+    console.log("power(", state, ",", this.mac, ")");
     const mac = this.mac;
     if (!mac) {
       return Promise.reject(new Error("No Mac address"));
@@ -184,24 +189,34 @@ class LGTVHost extends HostBase {
 
     return new Promise((resolve, reject) => {
       if (state === "on" || state === true) {
+        console.log("wol", mac);
         wol.wake(mac, error => {
+          console.log("wol callback");
           if (error) {
+            console.log("wol error", error);
             reject(error);
           } else {
+            console.log("waiting for power on");
             let countdown = 5,
               wait = () => {
                 setTimeout(() => {
-                  if (this.state.power === "on") {
-                    resolve();
-                    return;
-                  }
+                  console.log("countdown", countdown);
+                  try {
+                    if (this.state.power === "on") {
+                      console.log("resolve power is on");
+                      resolve();
+                      return;
+                    }
+                  } catch (e) {}
                   if (--countdown < 0) {
+                    console.log("reject power did not go on");
                     reject(new Error("LGTV did not power on"));
                   } else {
                     wait();
                   }
                 }, 1000);
               };
+            wait();
           }
         });
       } else {
@@ -244,7 +259,7 @@ class LGTVHost extends HostBase {
   }
 
   command(key, command) {
-    debug(this.host, "command", key, command);
+    console.log(this.host, "command", key, command);
     if (command === "POWERON") {
       return this.power(true);
     } else if (command === "POWEROFF") {
@@ -285,8 +300,10 @@ function main() {
     console.log("ENV variable LGTV_HOSTS not found");
     process.exit(1);
   }
-  LGTV_HOSTS.forEach(host => {
-    tvs[host] = new LGTVHost(host);
+  LGTV_HOSTS.forEach(item => {
+    const [host, mac] = item.split(";");
+    console.log("instance ", host);
+    tvs[host] = new LGTVHost(host, mac);
   });
 }
 

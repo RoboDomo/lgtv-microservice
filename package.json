@@ -28,6 +28,7 @@
     "debug": "^2.6.9",
     "lgtv2": "github:robodomo/lgtv2",
     "microservice-core": "github:robodomo/microservice-core",
-    "wake_on_lan": "0.0.4"
+    "node-wol": "^0.1.1",
+    "wake_on_lan": "^1.0.0"
   }
 }

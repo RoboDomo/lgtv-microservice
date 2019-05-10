@@ -190,7 +190,7 @@ class LGTVHost extends HostBase {
     return new Promise((resolve, reject) => {
       if (state === "on" || state === true) {
         console.log("wol", mac);
-        wol.wake(mac, error => {
+        wol.wake(mac, { address: "255.255.255.255" }, error => {
           console.log("wol callback");
           if (error) {
             console.log("wol error", error);

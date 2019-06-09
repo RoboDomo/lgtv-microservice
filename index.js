@@ -66,7 +66,7 @@ class LGTVHost extends HostBase {
       console.log("disconnect");
       if (err) {
         this.state = { power: "off" };
-        console.log("lgtv connect error", e);
+        console.log("lgtv connect error", err);
         return;
       }
       console.log(this.host, "disconnected");
@@ -301,7 +301,7 @@ function main() {
     process.exit(1);
   }
   LGTV_HOSTS.forEach(item => {
-    const [host, mac] = item.split(";");
+    const [host, mac] = item.split(",");
     console.log("instance ", host);
     tvs[host] = new LGTVHost(host, mac);
   });

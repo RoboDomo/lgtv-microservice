@@ -1,4 +1,5 @@
 process.env.DEBUG = "LGTVHost";
+process.title = process.env.TITLE || "lgtv-microservice";
 
 const debug = require("debug")("LGTVHost"),
   console = require("console"),

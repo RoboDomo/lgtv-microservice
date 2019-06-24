@@ -52,7 +52,7 @@ class LGTVHost extends HostBase {
 
     const lgtv = (this.lgtv = require("lgtv2")({
       url: url,
-      keyFile: `./lgtv-${this.host}-keyFile`
+      keyFile: `~/.local/robodomo/lgtv-${this.host}-keyFile`
     }));
 
     console.log("lgtv", lgtv);

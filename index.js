@@ -1,4 +1,4 @@
-process.env.DEBUG = "LGTVHost";
+process.env.DEBUG = "LGTVHost,HostBase";
 process.title = process.env.TITLE || "lgtv-microservice";
 
 const debug = require("debug")("LGTVHost"),
@@ -10,6 +10,7 @@ const TOPIC_ROOT = process.env.TOPIC_ROOT || "lgtv",
   MQTT_HOST = process.env.MQTT_HOST,
   LGTV_HOSTS = process.env.LGTV_HOSTS.split(",");
 
+// these are what we want to listen for from the TV
 const SUBSCRIPTIONS = {
   foregroundApp: "ssap://com.webos.applicationManager/getForegroundAppInfo",
   appStatus: "ssap://com.webos.service.appstatus/getAppStatus",
@@ -26,6 +27,10 @@ const SUBSCRIPTIONS = {
   powerOn: "ssap://power/on",
   powerOff: "ssap://power/off"
 };
+
+/**********************************************************************************
+ **********************************************************************************
+ **********************************************************************************/
 
 class LGTVHost extends HostBase {
   constructor(host, mac) {
@@ -49,26 +54,29 @@ class LGTVHost extends HostBase {
   connect() {
     const url = `ws://${this.host}:3000`;
 
-    debug(this.host, "connect", this.host, url);
+    debug(this.host, "connecting...", this.host, url);
 
     const lgtv = (this.lgtv = require("lgtv2")({
       url: url
       //      keyFile: `~/.local/robodomo/lgtv-${this.host}-keyFile`
     }));
 
-    console.log("lgtv", lgtv);
+    //    debug("lgtv", lgtv);
+
     // TODO: verify this is the right sequence
     lgtv.on("error", e => {
-      console.log("error", e);
+      console.log(this.host, "error", e);
       this.mouseSocket = null;
+      // this.exit(this.host, "lgtv error", e.message);
       //      this.connect();
     });
 
     lgtv.on("disconnect", err => {
-      console.log("disconnect");
+      console.log(this.host, "disconnect");
       if (err) {
         this.state = { power: "off" };
-        console.log("lgtv connect error", err);
+        console.log("lgtv disconnect error", err);
+        this.exit(this.host, "lgtv disconnect error", err);
         return;
       }
       console.log(this.host, "disconnected");
@@ -77,6 +85,7 @@ class LGTVHost extends HostBase {
       this.lgtv = null;
       this.state = { power: "off" };
       this.emit("disconnect");
+        this.exit(this.host, "lgtv disconnect", err);
       // maybe call this.connect()?
     });
 
@@ -282,8 +291,9 @@ class LGTVHost extends HostBase {
           return this.request("media.controls/fastForward");
         case "BACK":
           return this.request("media.controls/back");
-        default:
-          Promise.reject(new Error("Unknown command " + command));
+      default:
+        return;
+          // Promise.reject(new Error("Unknown command " + command));
       }
     }
   }

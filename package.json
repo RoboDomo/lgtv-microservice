@@ -4,7 +4,7 @@
   "description": "robodomo MQTT microservice to control and get status of LG TVs",
   "main": "index.js",
   "scripts": {
-    "start": "forever ./index.js",
+    "start": "./node_modules/.bin/forever ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,6 +26,7 @@
   "homepage": "https://github.com/robodomo/lgtv-microservice#readme",
   "dependencies": {
     "debug": "^4.3.1",
+    "forever": "^3.0.4",
     "lgtv2": "github:robodomo/lgtv2",
     "microservice-core": "github:robodomo/microservice-core",
     "node-wol": "^0.1.1",

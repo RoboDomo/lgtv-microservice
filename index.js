@@ -29,6 +29,7 @@ const SUBSCRIPTIONS = {
 
 class LGTVHost extends HostBase {
   constructor(host, mac) {
+    console.log("LGTVHost(", host, ",", mac, ")");
     super(MQTT_HOST, TOPIC_ROOT + "/" + host);
     this.mac = mac;
     process.env.DEBUG += "," + this.host;
@@ -51,8 +52,8 @@ class LGTVHost extends HostBase {
     debug(this.host, "connect", this.host, url);
 
     const lgtv = (this.lgtv = require("lgtv2")({
-      url: url,
-      keyFile: `./lgtv-${this.host}-keyFile`
+      url: url
+      //      keyFile: `~/.local/robodomo/lgtv-${this.host}-keyFile`
     }));
 
     console.log("lgtv", lgtv);
@@ -67,7 +68,7 @@ class LGTVHost extends HostBase {
       console.log("disconnect");
       if (err) {
         this.state = { power: "off" };
-        console.log("lgtv connect error", e);
+        console.log("lgtv connect error", err);
         return;
       }
       console.log(this.host, "disconnected");
@@ -120,7 +121,6 @@ class LGTVHost extends HostBase {
   }
 
   async connected() {
-    console.log("connected");
     debug(this.host, "connected");
     const lgtv = this.lgtv;
 
@@ -162,11 +162,11 @@ class LGTVHost extends HostBase {
 
   subscribe(topic, member) {
     this.lgtv.subscribe(topic, (err, info) => {
-      console.log(this.host, "subscribed", member);
+      //      console.log(this.host, "subscribed", member);
       if (err) {
         console.log(this.host, "ERROR", err);
       } else {
-        console.log(this.host, member, info);
+        //        console.log(this.host, member, info);
         const state = {};
         state[member] = info;
         if (state.foregroundApp && state.foregroundApp.appId === "") {
@@ -192,7 +192,6 @@ class LGTVHost extends HostBase {
       if (state === "on" || state === true) {
         console.log("wol", mac);
         wol.wake(mac, { address: "255.255.255.255" }, error => {
-          console.log("wol callback");
           if (error) {
             console.log("wol error", error);
             reject(error);
@@ -301,11 +300,12 @@ function main() {
     console.log("ENV variable LGTV_HOSTS not found");
     process.exit(1);
   }
-  LGTV_HOSTS.forEach(item => {
-    const [host, mac] = item.split(";");
+  console.log(LGTV_HOSTS);
+  for (const tv of LGTV_HOSTS) {
+    const [host, mac] = tv.split("/");
     console.log("instance ", host);
     tvs[host] = new LGTVHost(host, mac);
-  });
+  }
 }
 
 main();

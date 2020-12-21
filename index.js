@@ -10,6 +10,7 @@ const TOPIC_ROOT = process.env.TOPIC_ROOT || "lgtv",
   MQTT_HOST = process.env.MQTT_HOST,
   LGTV_HOSTS = process.env.LGTV_HOSTS.split(",");
 
+
 // these are what we want to listen for from the TV
 const SUBSCRIPTIONS = {
   foregroundApp: "ssap://com.webos.applicationManager/getForegroundAppInfo",
@@ -65,7 +66,7 @@ class LGTVHost extends HostBase {
 
     // TODO: verify this is the right sequence
     lgtv.on("error", e => {
-      console.log(this.host, "error", e);
+      console.log(this.host, "on error", e);
       this.mouseSocket = null;
       // this.exit(this.host, "lgtv error", e.message);
       //      this.connect();
@@ -85,7 +86,7 @@ class LGTVHost extends HostBase {
       this.lgtv = null;
       this.state = { power: "off" };
       this.emit("disconnect");
-        this.exit(this.host, "lgtv disconnect", err);
+      this.exit(this.host, "lgtv disconnect", err);
       // maybe call this.connect()?
     });
 
@@ -291,31 +292,26 @@ class LGTVHost extends HostBase {
           return this.request("media.controls/fastForward");
         case "BACK":
           return this.request("media.controls/back");
-      default:
-        return;
-          // Promise.reject(new Error("Unknown command " + command));
+        default:
+          return null;
+        // Promise.reject(new Error("Unknown command " + command));
       }
     }
   }
 }
 
-const tvs = {};
-
-function main() {
+const main = async () => {
   if (!MQTT_HOST) {
     console.log("ENV variable MQTT_HOST not found");
     process.exit(1);
   }
-  if (!LGTV_HOSTS || !LGTV_HOSTS.length) {
-    console.log("ENV variable LGTV_HOSTS not found");
-    process.exit(1);
+  const Config = await HostBase.config(),
+    tvs = Config.lgtv.tvs;
+
+  const tvHosts = {};
+  for (const tv of tvs) {
+    tvHosts[tv.device] = new LGTVHost(tv.device, tv.mac);
   }
-  console.log(LGTV_HOSTS);
-  for (const tv of LGTV_HOSTS) {
-    const [host, mac] = tv.split("/");
-    console.log("instance ", host);
-    tvs[host] = new LGTVHost(host, mac);
-  }
-}
+};
 
 main();

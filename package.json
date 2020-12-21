@@ -4,7 +4,7 @@
   "description": "robodomo MQTT microservice to control and get status of LG TVs",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/forever ./index.js",
+    "start": "./node_modules/.bin/forever -w ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
